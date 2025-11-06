@@ -24,7 +24,7 @@
 # sbatch --export=MANIFEST_FILE="/full/path/to/file/manifest.txt"  slurm_array_job_using_config.sb
 MANIFEST_FILE=${MANIFEST_FILE:=~/scratch/manifest.txt}
 
-test -f ${MANIFEST_FILE} || exit 4
+test -f "${MANIFEST_FILE}" || exit 4
 
 # Read the manifest into an array for faster processing
 declare -a MANIFEST_LIST
@@ -32,7 +32,13 @@ mapfile -t MANIFEST_LIST < "${MANIFEST_FILE}"
 
 # Process the contents of the manifiest - this is the array value matching the line in the manifest
 STEPID=$(( SLURM_ARRAY_TASK_ID + 1 ))
-echo "Processing task ID: ${SLURM_ARRAY_TASK_ID}, line ${STEPID} in ${MANIFEST_FILE}"
-echo "Input file: ${MANIFEST_LIST[${STEPID}]}"
-shasum -a 512 ${MANIFEST_LIST[${STEPID}]} >> ${MANIFEST_FILE}.sha512
+
+# Don't try to process past the end of the manifest
+if [[ ${STEPID} -le ${#MANIFEST_LIST[@]} ]];then
+    echo "Processing task ID: ${SLURM_ARRAY_TASK_ID}, line ${STEPID} in ${MANIFEST_FILE}"
+    echo "Input file: ${MANIFEST_LIST[${STEPID}]}"
+    shasum -a 512 "${MANIFEST_LIST[${STEPID}]}" >> "${MANIFEST_FILE}".sha512
+else
+    echo "no input for step ${SLURM_ARRAY_TASK_ID}" && exit 4
+fi
 

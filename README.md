@@ -21,3 +21,10 @@ A number of tools to do various things on the command line, you can install thes
         ```clyde:~/unix_utility_scripts (main 0S-1U) $```
 
 1. virtualenv_setup.sh - setups a python virtual enviroment in the existing directory.  **requires** a requirements.txt that includes any modules to be installed.
+
+## Slurm scripts
+
+Sample slurm submission scripts
+
+1. `Slurm_Examples/Slurm_array_Reading_manifest.sb` reads a manifiest file and builds an array job to execute on a list of files 
+1. `Slurm_Examples/Slurm_Array_Math.sb`
