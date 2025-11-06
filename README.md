@@ -27,4 +27,4 @@ A number of tools to do various things on the command line, you can install thes
 Sample slurm submission scripts
 
 1. `Slurm_Examples/Slurm_array_Reading_manifest.sb` reads a manifiest file and builds an array job to execute on a list of files 
-1. `Slurm_Examples/Slurm_Array_Math.sb`
+1. `Slurm_Examples/Slurm_Array_Math.sb` using calculations based on the `$SLURM_ARRAY_TASK_ID` to change parameters between runs. 
