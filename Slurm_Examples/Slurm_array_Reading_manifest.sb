@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+#SBATCH --job-name=shasum
+#SBATCH --output=/scratch/site/u/jonesc47/jobs/shasum_%A_%a.out
+#SBATCH --error=/scratch/site/u/jonesc47/jobs/shasum_%A_%a.err
+#SBATCH --time=00:10:00
+#SBATCH --mem=1G
+#SBATCH --array=1-45
+
+# Load necessary modules
+# ml parallel
+
+# Uses a manifest list to list files to execute.
+# e.g. a folder of images to convert list the images 1 per line
+#
+# N.B The Array slots *MUST* match the line count.
+# There is no way to dynamically run update the array slot count
+#
+# This script expects 1 parameter/file/action per line.
+# Each line in the manifest corresponds to a slurm array task
+# Parsing multiple variables from a line is possible but more complex
+
+# you can pass the manifest file using a variable from the slurm submission
+# sbatch --export=MANIFEST_FILE="/full/path/to/file/manifest.txt"  slurm_array_job_using_config.sb
+MANIFEST_FILE=${MANIFEST_FILE:=~/scratch/manifest.txt}
+
+test -f ${MANIFEST_FILE} || exit 4
+
+# Read the manifest into an array for faster processing
+declare -a MANIFEST_LIST
+mapfile -t MANIFEST_LIST < "${MANIFEST_FILE}"
+
+# Process the contents of the manifiest - this is the array value matching the line in the manifest
+STEPID=$(( SLURM_ARRAY_TASK_ID + 1 ))
+echo "Processing task ID: ${SLURM_ARRAY_TASK_ID}, line ${STEPID} in ${MANIFEST_FILE}"
+echo "Input file: ${MANIFEST_LIST[${STEPID}]}"
+shasum -a 512 ${MANIFEST_LIST[${STEPID}]} >> ${MANIFEST_FILE}.sha512
+
