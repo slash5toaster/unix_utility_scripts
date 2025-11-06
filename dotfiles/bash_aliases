@@ -1,0 +1,14 @@
+# launch vscode at the root of the repo
+alias codehere='code -n $(git root)'
+alias cp='cp -vi'
+alias df='df -Ph'
+alias genpass='echo $(openssl rand -hex 6)-$(openssl rand -hex 6 | tr '[:lower:]' '[:upper:]')-$(openssl rand -hex 6)'
+# this requires the git aliases to be installed see gitconfig
+alias gr='cd $(git root)'
+alias l='ls -CF'
+alias la='ls -A'
+alias ll='ls -l'
+alias mv='mv -vi'
+alias rm='rm -vi'
+# gives a listing of folder contents by size - requires parallel https://www.gnu.org/software/parallel/"
+alias topcount="find . -mindepth 1 -maxdepth 1 | parallel du -s | sort -nr | head -n 15 | sed -e 's/\.\///'"

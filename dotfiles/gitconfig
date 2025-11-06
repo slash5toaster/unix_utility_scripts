@@ -1,0 +1,35 @@
+[user]
+	name = First Last
+	email = First.Last@dotmatics.com
+[push]
+	default = tracking
+[diff]
+	tool = vimdiff
+[fetch]
+	prune = true
+[core]
+        sshCommand = ssh -i ~/.ssh/id_ed25519
+        excludesfile = ~/.gitignore_global
+	editor = vim
+[credential]
+	helper = cache --timeout=6000
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[alias]
+	last = log -1 HEAD
+	root = rev-parse --show-toplevel
+	sclone = clone --recurse-submodules
+	sco = checkout --recurse-submodules
+	shallow-clone = clone --depth=1 --no-single-branch
+	spull = pull --recurse-submodules
+	spush = push --recurse-submodules check
+	tagcommit = rev-list -n 1
+	listtag = tag -l --sort=-creatordate --format='%(creatordate:short)%09%(refname:short)%09%(objectname:short)'
+	tree = log --graph --oneline --all
+[init]
+	defaultBranch = main
+[pull]
+	ff = only

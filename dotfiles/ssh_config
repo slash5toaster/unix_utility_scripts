@@ -1,0 +1,28 @@
+
+## Customers
+
+# Customer01
+Host customer01-prod
+     HostName customer01-byosphere.proteinmetrics.com
+     Compression yes
+     User ec2-user
+     IdentityFile ~/.ssh/pmi-customer01-us-west-2-restricted.pem
+Host customer01-dev
+     HostName customer01-dev.byosphere-proteinmetrics.com
+     Compression yes
+     User ec2-user
+     IdentityFile ~/.ssh/pmi-customer01-us-west-2-restricted.pem
+
+# Customer02 https://c02.byosphere-proteinmetrics.com
+Host c02-prod
+     HostName c02.byosphere-proteinmetrics.com
+     Compression yes
+     User ec2-user
+     IdentityFile ~/.ssh/pmi-c02-us-west-2.pem
+
+## PMI
+Host et-prod-aws-5.6
+     HostName xxx.xxx.xxx.xxx
+     Compression yes
+     User ec2-user
+     IdentityFile ~/.ssh/pmi_prod.pem
