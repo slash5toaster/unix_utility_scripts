@@ -18,6 +18,6 @@ A number of tools to do various things on the command line, you can install thes
 1. sha_dups - finds duplicates of files in a directory tree based on the manifest file. This needs to have parallel installed https://www.gnu.org/software/parallel/ or `sudo yum install -y parallel`
 1. git_infostring.sh - for use in PS1 variables. Gives information about git repo while in the directory, this should be part of your `.bashrc` to update your prompt like so
 
-        ```clyde:~/enterprise_services/unix_utility_scripts (unix_utility_scripts 0S-1U) $```
+        ```clyde:~/unix_utility_scripts (unix_utility_scripts 0S-1U) $```
 
 1. virtualenv_setup.sh - setups a python virtual enviroment in the existing directory.  **requires** a requirements.txt that includes any modules to be installed.

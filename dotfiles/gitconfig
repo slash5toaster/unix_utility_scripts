@@ -1,6 +1,6 @@
 [user]
 	name = First Last
-	email = First.Last@dotmatics.com
+	email = last.first@gene.com
 [push]
 	default = tracking
 [diff]
@@ -8,8 +8,8 @@
 [fetch]
 	prune = true
 [core]
-        sshCommand = ssh -i ~/.ssh/id_ed25519
-        excludesfile = ~/.gitignore_global
+    sshCommand = ssh -i ~/.ssh/id_ed25519
+    excludesfile = ~/.gitignore_global
 	editor = vim
 [credential]
 	helper = cache --timeout=6000
