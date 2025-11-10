@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+
+#SBATCH --job-name=shasum
+#SBATCH --output=/scratch/site/u/jonesc47/jobs/shasum_%A_%a.out
+#SBATCH --error=/scratch/site/u/jonesc47/jobs/shasum_%A_%a.err
+#SBATCH --time=00:10:00
+#SBATCH --mem=1G
+#SBATCH --array=1-45
+
+# Load necessary modules
+# ml parallel
+
+# Uses a manifest list to list files to execute.
+# e.g. a folder of images to convert list the images 1 per line
+#
+# N.B The Array slots *MUST* match the line count.
+# There is no way to dynamically run update the array slot count
+#
+# This script allows you to pass multiple paramters per line, with common separator (e.g. CSV)
+# Don't use a header line (or adjust the STEPID variable to start from the second line)
+# You must account for the WHOLE file length in the array steps above (e.g. 46 samples plus header)
+# For example
+# File,FirstParam,SecondParam,ThirdParam
+#
+# you can pass the manifest file using a variable from the slurm submission
+# sbatch --export=MANIFEST_FILE="/full/path/to/file/manifest.txt"  slurm_array_job_using_config.sb
+MANIFEST_FILE=${MANIFEST_FILE:=~/scratch/manifest.txt}
+
+test -f "${MANIFEST_FILE}" || exit 4
+
+# Read the manifest into an array for faster processing
+declare -a MANIFEST_LIST
+mapfile -t MANIFEST_LIST < "${MANIFEST_FILE}"
+
+# Process the contents of the manifiest - this is the array value matching the line in the manifest
+STEPID=$(( SLURM_ARRAY_TASK_ID + 1 ))
+
+# Don't try to process past the end of the manifest
+if [[ ${STEPID} -le ${#MANIFEST_LIST[@]} ]];then
+
+    # this parses the manifest line into parameters 
+    # uses the separator to parse the line. N.B. your parameters MUST NOT include the separator
+    # you can change this to match whatever you use "|, _, whatever"
+    IFS=',' read -r -a TEMPARRAY <<< "${MANIFEST_LIST[${STEPID}]}"
+    TargetFile=${TEMPARRAY[0]}
+    FirstParam=${TEMPARRAY[1]}
+    SecondParam=${TEMPARRAY[2]}
+    ThirdParam=${TEMPARRAY[3]}
+
+    echo "Processing task ID: ${SLURM_ARRAY_TASK_ID}, line ${STEPID} in ${MANIFEST_FILE}"
+    echo "Input file: ${MANIFEST_LIST[${STEPID}]}"
+    echo "Using ${FirstParam}, ${SecondParam},${ThirdParam} on ${TargetFile}"
+    shasum -a ${FirstParam} "${TargetFile}" >> "${MANIFEST_FILE}".sha512
+else
+    echo "no input for step ${SLURM_ARRAY_TASK_ID}" && exit 4
+fi
+
