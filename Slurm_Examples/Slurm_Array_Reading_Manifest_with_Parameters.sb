@@ -33,7 +33,9 @@ declare -a MANIFEST_LIST
 mapfile -t MANIFEST_LIST < "${MANIFEST_FILE}"
 
 # Process the contents of the manifiest - this is the array value matching the line in the manifest
-STEPID=$(( SLURM_ARRAY_TASK_ID + 0 ))
+# If you have a header then change the additional line
+HEADER_LINES=0
+STEPID=$(( SLURM_ARRAY_TASK_ID + ${HEADER_LINES} ))
 
 # Don't try to process past the end of the manifest
 if [[ ${STEPID} -le ${#MANIFEST_LIST[@]} ]];then
