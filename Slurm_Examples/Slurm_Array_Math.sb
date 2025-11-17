@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 
+#SBATCH --job-name=array_math
 #SBATCH -p batch_cpu
-#SBATCH --qos=1d
+#SBATCH --qos=3h
 #SBATCH --cpus-per-task=1
-#SBATCH --mem-per-cpu=4G
-#SBATCH --cpus-per-task=1
+#SBATCH --mem-per-cpu=1G
+#SBATCH --output=/scratch/site/u/jonesc47/jobs/shasum_%A_%a.out
+#SBATCH --error=/scratch/site/u/jonesc47/jobs/shasum_%A_%a.err
 
 # this should be the total number of array steps, e.g. max values divided by range 
 #SBATCH --array=0-384
-
 #SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT_90
 #SBATCH --mail-user=`$USER`@gene.com
 
@@ -17,10 +18,10 @@
 #        e.g. SLURM_ARRAY_TASK_ID=0 should have a range of 1-9
 
 RANGE_SIZE=9
-START_INDEX=$(( SLURM_ARRAY_TASK_ID * RANGE_SIZE + 0 ))
+START_INDEX=$(( SLURM_ARRAY_TASK_ID * RANGE_SIZE + 1 ))
 END_INDEX=$(( (SLURM_ARRAY_TASK_ID * RANGE_SIZE) + RANGE_SIZE ))
-DATA_FILE="/path/to/some/file"
-OUTPUT_FOLDER="/path/output/job/${SLURM_ARRAY_JOB_ID}/"
+DATA_FILE="/tmp/path/to/some/file"
+OUTPUT_FOLDER="/tmp/path/output/job/${SLURM_ARRAY_JOB_ID}/"
 
 mkdir -vp "${OUTPUT_FOLDER}"
 
