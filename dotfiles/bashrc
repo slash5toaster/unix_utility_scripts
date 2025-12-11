@@ -20,6 +20,8 @@ test -d ~/.local/bin/ && export PATH=~/.local/bin/:$PATH
 
 # http://stackoverflow.com/questions/9457233/unlimited-bash-history
 # ---------------------
+# don't put duplicate lines in the history. See bash(1) for more options
+export HISTCONTROL=ignoredups
 export HISTFILESIZE=100000
 export HISTSIZE=100000
 export HISTTIMEFORMAT="[%F %T] "
@@ -28,9 +30,6 @@ shopt -s histappend
 # Change the file location because certain bash sessions truncate .bash_history file upon close.
 # http://superuser.com/questions/575479/bash-history-truncated-to-500-lines-on-each-login
 export HISTFILE=~/.bash_eternal_history
-# don't put duplicate lines or lines starting with space in the history.
-# See bash(1) for more options
-HISTCONTROL=ignoreboth
 
 # Force prompt to write history after every command.
 # http://superuser.com/questions/20900/bash-history-loss
@@ -98,11 +97,12 @@ esac
 
 # Alias definitions.
 # You may want to put all your additions into a separate file like
-# ~/.bash_aliases, instead of adding them here directly.
+# ~/.bash_alias, instead of adding them here directly.
 # See /usr/share/doc/bash-doc/examples in the bash-doc package.
 
-if [ -f ~/.bash_aliases ]; then
-    . ~/.bash_aliases
+# User specific aliases and functions moved to .bash_alias
+if [ -f ~/.bash_alias ]; then
+    . ~/.bash_alias
 fi
 
 # enable programmable completion features (you don't need to enable
@@ -117,7 +117,10 @@ if ! shopt -oq posix; then
 fi
 
 # fzf command completion from https://github.com/junegunn/fzf.git 
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+if [[ $(type -p perl) ]] ; then
+   [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+   [ -f ~/.fzf.bash ] && export MANPATH=${MANPATH}:$(dirname $(type -p fzf))/../man/
+fi
 
 # End of File,  if this is missing the file has been truncated
 ###############################################################
