@@ -7,8 +7,10 @@ IFS=$'\n\t'
 # VERBOSE=0
 
 #---------------------------------------------------------------
+# add ml for parallel
+type -t ml >/dev/null && ml parallel
 PARALLELBIN=$(type -p parallel || echo "nada")
-SHASUMBIN=$(type -p sha1sum || type -p shasum )
+SHASUMBIN=$(type -p shasum || type -p sha1sum )
 PARALLEL_OPTS="--xarg"
 
 # set TMP to TMPDIR else fall back to /tmp
@@ -43,7 +45,7 @@ if [ -e "${TARGETDIR}" ] ; then
        | grep -iv "\.venv" \
        | grep -iv "\.TemporaryItems" \
        | grep -iv "\.Trashes" \
-       | ${PARALLELBIN} -j 60 ${PARALLEL_OPTS} "${SHASUMBIN}" {} \
+       | ${PARALLELBIN} -j 60 ${PARALLEL_OPTS} ${SHASUMBIN} {} \
        | sed -e 's/\.\///' \
        | sort -k2 -T "$TMP" > "${FOLDERNAME}".sha1
   else
