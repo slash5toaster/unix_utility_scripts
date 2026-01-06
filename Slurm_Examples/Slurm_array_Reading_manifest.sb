@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 #SBATCH --job-name=shasum
-#SBATCH --output=/scratch/site/u/jonesc47/jobs/shasum_%A_%a.out
-#SBATCH --error=/scratch/site/u/jonesc47/jobs/shasum_%A_%a.err
+#SBATCH --output=/scratch/site/u/jonesc47/jobs/array_manifest_%A_%a.out
+#SBATCH --error=/scratch/site/u/jonesc47/jobs/array_manifest_%A_%a.err
 #SBATCH --time=00:10:00
-#SBATCH --mem=1G
+#SBATCH --mem=2G
 #SBATCH --array=1-45
 
 # Load necessary modules
@@ -23,9 +23,14 @@
 # you can pass the manifest file using a variable from the slurm submission
 # sbatch --export=MANIFEST_FILE="/full/path/to/file/manifest.txt"  slurm_array_job_using_config.sb
 MANIFEST_FILE=${MANIFEST_FILE:=~/scratch/manifest.txt}
+# Items per array to process.  e.g. each array slot will work on this number of items
+PROCESS_COUNT=1
 
 test -f "${MANIFEST_FILE}" || exit 4
-
+PROCESS_SLOTS=$(( ${SLURM_ARRAY_TASK_COUNT}*${PROCESS_COUNT} ))
+if [[ ${PROCESS_SLOTS} -le $(wc -l ~/scratch/bin/manifest.txt | cut -f 1 -d " ") ]]; then
+   echo "${MANIFEST_FILE} is longer, $(wc -l ~/scratch/bin/manifest.txt | cut -f 1 -d " ") lines, than the array list (${PROCESS_SLOTS} slots) ensure you are processing all the items!!"
+fi
 # Read the manifest into an array for faster processing
 declare -a MANIFEST_LIST
 mapfile -t MANIFEST_LIST < "${MANIFEST_FILE}"
