@@ -28,12 +28,15 @@ PROCESS_COUNT=1
 
 test -f "${MANIFEST_FILE}" || exit 4
 PROCESS_SLOTS=$(( ${SLURM_ARRAY_TASK_COUNT}*${PROCESS_COUNT} ))
-if [[ ${PROCESS_SLOTS} -le $(wc -l ~/scratch/bin/manifest.txt | cut -f 1 -d " ") ]]; then
-   echo "${MANIFEST_FILE} is longer, $(wc -l ~/scratch/bin/manifest.txt | cut -f 1 -d " ") lines, than the slurm array size (${PROCESS_SLOTS} slots) ensure you are processing all the items!!"
-fi
+
 # Read the manifest into an array for faster processing
 declare -a MANIFEST_LIST
 mapfile -t MANIFEST_LIST < "${MANIFEST_FILE}"
+
+# Check the counts!
+if [[ ${PROCESS_SLOTS} -le ${#MANIFEST_LIST[@]} ]]; then
+   echo "${MANIFEST_FILE} is longer, ${#MANIFEST_LIST[@]} lines, than the slurm array size (${PROCESS_SLOTS} slots) ensure you are processing all the items!!"
+fi
 
 # Process the contents of the manifiest - this is the array value matching the line in the manifest
 # If you have a header then change the additional line
