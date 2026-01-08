@@ -9,24 +9,29 @@
 #SBATCH --error=/scratch/site/u/jonesc47/jobs/array_math_%A_%a.err
 
 # this should be the total number of array steps, e.g. max values divided by range 
-#SBATCH --array=0-384
+#SBATCH --array=0-38
 #SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT_90
 #SBATCH --mail-user=`$USER`@gene.com
+
+# set -x 
 
 # range size is the change in each array step. e.g.  range should be (1-9, 10-18, 19-27, ... )
 # Start index needs to be offset by 1 as the slurm task array is zero based, and our range starts from 1. 
 #        e.g. SLURM_ARRAY_TASK_ID=0 should have a range of 1-9
 
-RANGE_SIZE=9
-START_INDEX=$(( SLURM_ARRAY_TASK_ID * RANGE_SIZE + 0 ))
+RANGE_SIZE=18
+ARRAY_OFFSET=$(( SLURM_ARRAY_TASK_ID ))
+START_INDEX=$(( ARRAY_OFFSET * RANGE_SIZE ))
+START_INDEX=$(( START_INDEX + 1 ))
 END_INDEX=$(( START_INDEX + RANGE_SIZE - 1 ))
 DATA_FILE="/tmp/path/to/some/file"
-OUTPUT_FOLDER="/tmp/path/output/job/${SLURM_ARRAY_JOB_ID}/"
+OUTPUT_FOLDER="/tmp/path/output/job/${SLURM_ARRAY_JOB_ID}"
 
 mkdir -vp "${OUTPUT_FOLDER}"
-
-echo  "my_binary" \
+echo  " Array Task $SLURM_ARRAY_TASK_ID 
+        my_binary" \
         --start ${START_INDEX} \
         --end ${END_INDEX} \
         -o "${OUTPUT_FOLDER}/${SLURM_ARRAY_TASK_ID}.out" \
         --data-file "${DATA_FILE}"
+        sleep $(( RANDOM%11 ))s
