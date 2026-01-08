@@ -8,7 +8,7 @@
 #SBATCH --array=1-45
 
 # Load necessary modules
-# ml parallel
+ml parallel git 
 
 # Uses a manifest list to list files to execute.
 # e.g. a folder of images to convert list the images 1 per line
@@ -27,7 +27,7 @@ MANIFEST_FILE=${MANIFEST_FILE:=~/scratch/manifest.txt}
 PROCESS_COUNT=1
 
 test -f "${MANIFEST_FILE}" || exit 4
-PROCESS_SLOTS=$(( ${SLURM_ARRAY_TASK_COUNT}*${PROCESS_COUNT} ))
+PROCESS_SLOTS=$(( SLURM_ARRAY_TASK_COUNT * PROCESS_COUNT ))
 
 # Read the manifest into an array for faster processing
 declare -a MANIFEST_LIST
@@ -41,14 +41,19 @@ fi
 # Process the contents of the manifiest - this is the array value matching the line in the manifest
 # If you have a header then change the additional line
 HEADER_LINES=0
-STEPID=$(( SLURM_ARRAY_TASK_ID + ${HEADER_LINES} ))
+STEP_ID=$(( SLURM_ARRAY_TASK_ID + HEADER_LINES ))
+LINES_TO_RUN=$(( STEP_ID * PROCESS_SLOTS ))
 
-# Don't try to process past the end of the manifest
-if [[ ${STEPID} -le ${#MANIFEST_LIST[@]} ]];then
-    echo "Processing task ID: ${SLURM_ARRAY_TASK_ID}, line ${STEPID} in ${MANIFEST_FILE}"
-    echo "Input file: ${MANIFEST_LIST[${STEPID}]}"
-    shasum -a 512 "${MANIFEST_LIST[${STEPID}]}" >> "${MANIFEST_FILE}".sha512
-else
-    echo "no input for step ${SLURM_ARRAY_TASK_ID}" && exit 4
-fi
-
+# loop thru the number of items assigned to this slot
+for STEP_PLUS in $(seq 0 $(( PROCESS_SLOTS - 1 )) ); 
+do 
+    ITEM_TO_PROCESS=$(( STEP_PLUS + LINES_TO_RUN ))
+    # Don't try to process past the end of the manifest
+    if [[ ${ITEM_TO_PROCESS} -le ${#MANIFEST_LIST[@]} ]];then
+        echo "Processing task ID: ${SLURM_ARRAY_TASK_ID}, line ${ITEM_TO_PROCESS} in ${MANIFEST_FILE}"
+        echo "Input file: ${MANIFEST_LIST[${ITEM_TO_PROCESS}]}"
+        shasum -a 512 "${MANIFEST_LIST[${ITEM_TO_PROCESS}]}" >> "${MANIFEST_FILE}".sha512
+    else
+        echo "no input for step ${SLURM_ARRAY_TASK_ID}, item $ITEM_TO_PROCESS" && exit 4
+    fi
+done
