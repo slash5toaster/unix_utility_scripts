@@ -19,7 +19,7 @@
 
 RANGE_SIZE=9
 START_INDEX=$(( SLURM_ARRAY_TASK_ID * RANGE_SIZE + 0 ))
-END_INDEX=$(( (START_INDEX + (RANGE_SIZE - 1 ))
+END_INDEX=$(( START_INDEX + RANGE_SIZE - 1 ))
 DATA_FILE="/tmp/path/to/some/file"
 OUTPUT_FOLDER="/tmp/path/output/job/${SLURM_ARRAY_JOB_ID}/"
 
