@@ -5,8 +5,8 @@
 #SBATCH --qos=3h
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=1G
-#SBATCH --output=/scratch/site/u/jonesc47/jobs/shasum_%A_%a.out
-#SBATCH --error=/scratch/site/u/jonesc47/jobs/shasum_%A_%a.err
+#SBATCH --output=/scratch/site/u/jonesc47/jobs/array_math_%A_%a.out
+#SBATCH --error=/scratch/site/u/jonesc47/jobs/array_math_%A_%a.err
 
 # this should be the total number of array steps, e.g. max values divided by range 
 #SBATCH --array=0-384
