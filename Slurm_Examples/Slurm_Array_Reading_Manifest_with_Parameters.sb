@@ -55,7 +55,7 @@ if [[ ${STEPID} -le ${#MANIFEST_LIST[@]} ]];then
     # Add Code to work here
     echo "Processing task ID: ${SLURM_ARRAY_TASK_ID}, line ${STEPID} in ${MANIFEST_FILE}"
     echo "Input file: ${MANIFEST_LIST[${STEPID}]}"
-    echo "Using ${FirstParam}, ${SecondParam},${ThirdParam} on ${TargetFile}"
+    echo "Using ${FirstParam}, ${SecondParam}, ${ThirdParam} on ${TargetFile}"
     
 else
     echo "no input for step ${STEPID}"
