@@ -66,7 +66,7 @@ do
         echo "${MANIFEST_LIST[${ITEM_TO_PROCESS}]}" | xargs printf '%x\n'
     else
         sleep $(( RANDOM%20 ))
-        echo "Step ${SLURM_ARRAY_TASK_ID}, item $ITEM_TO_PROCESS is past the end of the manifest" >&2 && exit 4
+        echo "Step ${SLURM_ARRAY_TASK_ID}, item $ITEM_TO_PROCESS is past the end of the manifest" >&2
     fi
     sleep $(( RANDOM%20 ))
 done
