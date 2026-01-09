@@ -5,10 +5,10 @@
 #SBATCH --error=/scratch/site/u/jonesc47/jobs/%A_%a_array_manifest.err
 #SBATCH --time=00:10:00
 #SBATCH --mem=2G
-# Math depends on a zero based array
-#SBATCH --array=0-99
+# Math depends on a zero based array, change the max to get enough slots (slots = items to process/PROCESS_COUNT)
+#SBATCH --array=0-76
 
-set -x 
+# set -x 
 
 # Load necessary modules
 ml parallel git 
@@ -31,7 +31,7 @@ MANIFEST_FILE=${MANIFEST_FILE:=~/scratch/manifest.txt}
 HEADER_LINES=0
 
 # Items per array to process.  e.g. each array slot will work on this number of items
-PROCESS_COUNT=18
+PROCESS_COUNT=23
 
 test -f "${MANIFEST_FILE}" || exit 4
 PROCESS_SLOTS=$(( SLURM_ARRAY_TASK_COUNT * PROCESS_COUNT ))
@@ -63,6 +63,7 @@ do
 
         # Do the actual work!!!!
         # shasum -a 512 "${MANIFEST_LIST[${ITEM_TO_PROCESS}]}" >> "${MANIFEST_FILE}".sha512
+        echo "${MANIFEST_LIST[${ITEM_TO_PROCESS}]}" | xargs printf '%x\n'
     else
         sleep $(( RANDOM%20 ))
         echo "Step ${SLURM_ARRAY_TASK_ID}, item $ITEM_TO_PROCESS is past the end of the manifest" >&2 && exit 4
