@@ -26,6 +26,9 @@
 # sbatch --export=MANIFEST_FILE="/full/path/to/file/manifest.txt"  slurm_array_job_using_config.sb
 MANIFEST_FILE=${MANIFEST_FILE:=~/scratch/manifest.txt}
 
+# If you have a header then change the additional line
+HEADER_LINES=0
+
 test -f "${MANIFEST_FILE}" || exit 4
 
 # Read the manifest into an array for faster processing
@@ -34,26 +37,27 @@ mapfile -t MANIFEST_LIST < "${MANIFEST_FILE}"
 
 # Process the contents of the manifiest - this is the array value matching the line in the manifest
 # If you have a header then change the additional line
-HEADER_LINES=0
-STEPID=$(( SLURM_ARRAY_TASK_ID + ${HEADER_LINES} ))
+STEPID=$(( SLURM_ARRAY_TASK_ID + HEADER_LINES ))
 
 # Don't try to process past the end of the manifest
 if [[ ${STEPID} -le ${#MANIFEST_LIST[@]} ]];then
 
     # this parses the manifest line into parameters 
-    # uses the separator to parse the line. N.B. your parameters MUST NOT include the separator
-    # you can change this to match whatever you use "|, _, whatever"
+    # uses the separator (IFS) to parse the line. 
+    # N.B. your parameters MUST NOT include the separator
+    # Change the IFS to match whatever you use "|, _, whatever"
     IFS=',' read -r -a TEMPARRAY <<< "${MANIFEST_LIST[${STEPID}]}"
     TargetFile=${TEMPARRAY[0]}
     FirstParam=${TEMPARRAY[1]}
     SecondParam=${TEMPARRAY[2]}
     ThirdParam=${TEMPARRAY[3]}
 
+    # Add Code to work here
     echo "Processing task ID: ${SLURM_ARRAY_TASK_ID}, line ${STEPID} in ${MANIFEST_FILE}"
     echo "Input file: ${MANIFEST_LIST[${STEPID}]}"
     echo "Using ${FirstParam}, ${SecondParam},${ThirdParam} on ${TargetFile}"
-    shasum -a ${FirstParam} "${TargetFile}" >> "${MANIFEST_FILE}".sha512
+    
 else
-    echo "no input for step ${SLURM_ARRAY_TASK_ID}" && exit 4
+    echo "no input for step ${STEPID}"
 fi
 
