@@ -53,9 +53,9 @@ START_INDEX=$(( START_INDEX + HEADER_LINES ))
 END_INDEX=$(( START_INDEX + PROCESS_COUNT - 1 ))
 
 # loop thru the number of items assigned to this slot
-for ITEM_TO_PROCESS in $( seq $START_INDEX $END_INDEX ); 
+for ITEM_TO_PROCESS in $( seq ${START_INDEX} ${END_INDEX} ); 
 do 
-    echo "Where we are - $SLURM_ARRAY_TASK_ID - ${ITEM_TO_PROCESS} - ${START_INDEX} - ${END_INDEX} ${#MANIFEST_LIST[@]}"
+    echo "Where we are - ${SLURM_ARRAY_TASK_ID} - ${ITEM_TO_PROCESS} - ${START_INDEX} - ${END_INDEX} ${#MANIFEST_LIST[@]}"
     # Don't try to process past the end of the manifest
     if [[ ${ITEM_TO_PROCESS} -le ${#MANIFEST_LIST[@]} ]];then
         echo "Processing task ID: ${SLURM_ARRAY_TASK_ID}, line ${ITEM_TO_PROCESS} in ${MANIFEST_FILE}"
@@ -66,7 +66,7 @@ do
         echo "${MANIFEST_LIST[${ITEM_TO_PROCESS}]}" | xargs printf '%x\n'
     else
         sleep $(( RANDOM%20 ))
-        echo "Step ${SLURM_ARRAY_TASK_ID}, item $ITEM_TO_PROCESS is past the end of the manifest" >&2
+        echo "Step ${SLURM_ARRAY_TASK_ID}, item ${ITEM_TO_PROCESS} is past the end of the manifest" >&2
     fi
     sleep $(( RANDOM%20 ))
 done
