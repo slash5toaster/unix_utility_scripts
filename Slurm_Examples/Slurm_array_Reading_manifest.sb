@@ -1,14 +1,17 @@
 #!/usr/bin/env bash
 
 #SBATCH --job-name=shasum
-#SBATCH --output=/scratch/site/u/jonesc47/jobs/array_manifest_%A_%a.out
-#SBATCH --error=/scratch/site/u/jonesc47/jobs/array_manifest_%A_%a.err
+#SBATCH --output=/scratch/site/u/jonesc47/jobs/%A_%a_array_manifest.out
+#SBATCH --error=/scratch/site/u/jonesc47/jobs/%A_%a_array_manifest.err
 #SBATCH --time=00:10:00
 #SBATCH --mem=2G
-#SBATCH --array=1-45
+# Math depends on a zero based array, change the max to get enough slots (slots = items to process/PROCESS_COUNT)
+#SBATCH --array=0-76
+
+# set -x 
 
 # Load necessary modules
-# ml parallel
+ml parallel git 
 
 # Uses a manifest list to list files to execute.
 # e.g. a folder of images to convert list the images 1 per line
@@ -23,29 +26,47 @@
 # you can pass the manifest file using a variable from the slurm submission
 # sbatch --export=MANIFEST_FILE="/full/path/to/file/manifest.txt"  slurm_array_job_using_config.sb
 MANIFEST_FILE=${MANIFEST_FILE:=~/scratch/manifest.txt}
+
+# If you have a header then change the additional line
+HEADER_LINES=0
+
 # Items per array to process.  e.g. each array slot will work on this number of items
-PROCESS_COUNT=1
+PROCESS_COUNT=23
 
 test -f "${MANIFEST_FILE}" || exit 4
-PROCESS_SLOTS=$(( ${SLURM_ARRAY_TASK_COUNT}*${PROCESS_COUNT} ))
-if [[ ${PROCESS_SLOTS} -le $(wc -l ~/scratch/bin/manifest.txt | cut -f 1 -d " ") ]]; then
-   echo "${MANIFEST_FILE} is longer, $(wc -l ~/scratch/bin/manifest.txt | cut -f 1 -d " ") lines, than the slurm array size (${PROCESS_SLOTS} slots) ensure you are processing all the items!!"
-fi
+PROCESS_SLOTS=$(( SLURM_ARRAY_TASK_COUNT * PROCESS_COUNT ))
+
 # Read the manifest into an array for faster processing
 declare -a MANIFEST_LIST
 mapfile -t MANIFEST_LIST < "${MANIFEST_FILE}"
 
-# Process the contents of the manifiest - this is the array value matching the line in the manifest
-# If you have a header then change the additional line
-HEADER_LINES=0
-STEPID=$(( SLURM_ARRAY_TASK_ID + ${HEADER_LINES} ))
-
-# Don't try to process past the end of the manifest
-if [[ ${STEPID} -le ${#MANIFEST_LIST[@]} ]];then
-    echo "Processing task ID: ${SLURM_ARRAY_TASK_ID}, line ${STEPID} in ${MANIFEST_FILE}"
-    echo "Input file: ${MANIFEST_LIST[${STEPID}]}"
-    shasum -a 512 "${MANIFEST_LIST[${STEPID}]}" >> "${MANIFEST_FILE}".sha512
-else
-    echo "no input for step ${SLURM_ARRAY_TASK_ID}" && exit 4
+# Check the counts!
+if [[ ${PROCESS_SLOTS} -le ${#MANIFEST_LIST[@]} ]]; then
+   echo "${MANIFEST_FILE} is longer, ${#MANIFEST_LIST[@]} lines, than the slurm array size (${PROCESS_SLOTS} slots) ensure you are processing all the items!!" >&2
 fi
 
+# Process the contents of the manifiest - this is the array value matching the line in the manifest
+# where to start in the manifest
+ARRAY_OFFSET=$(( SLURM_ARRAY_TASK_ID ))
+START_INDEX=$(( ARRAY_OFFSET * PROCESS_COUNT ))
+START_INDEX=$(( START_INDEX + HEADER_LINES ))
+END_INDEX=$(( START_INDEX + PROCESS_COUNT - 1 ))
+
+# loop thru the number of items assigned to this slot
+for ITEM_TO_PROCESS in $( seq $START_INDEX $END_INDEX ); 
+do 
+    echo "Where we are - $SLURM_ARRAY_TASK_ID - ${ITEM_TO_PROCESS} - ${START_INDEX} - ${END_INDEX} ${#MANIFEST_LIST[@]}"
+    # Don't try to process past the end of the manifest
+    if [[ ${ITEM_TO_PROCESS} -le ${#MANIFEST_LIST[@]} ]];then
+        echo "Processing task ID: ${SLURM_ARRAY_TASK_ID}, line ${ITEM_TO_PROCESS} in ${MANIFEST_FILE}"
+        echo "Input line ${ITEM_TO_PROCESS}: ${MANIFEST_LIST[${ITEM_TO_PROCESS}]}"
+
+        # Do the actual work!!!!
+        # shasum -a 512 "${MANIFEST_LIST[${ITEM_TO_PROCESS}]}" >> "${MANIFEST_FILE}".sha512
+        echo "${MANIFEST_LIST[${ITEM_TO_PROCESS}]}" | xargs printf '%x\n'
+    else
+        sleep $(( RANDOM%20 ))
+        echo "Step ${SLURM_ARRAY_TASK_ID}, item $ITEM_TO_PROCESS is past the end of the manifest" >&2 && exit 4
+    fi
+    sleep $(( RANDOM%20 ))
+done
