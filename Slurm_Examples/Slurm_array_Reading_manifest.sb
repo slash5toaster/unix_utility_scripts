@@ -25,7 +25,10 @@ ml parallel git
 
 # you can pass the manifest file using a variable from the slurm submission
 # sbatch --export=MANIFEST_FILE="/full/path/to/file/manifest.txt"  slurm_array_job_using_config.sb
-MANIFEST_FILE=${MANIFEST_FILE:=~/scratch/manifest.txt}
+MANIFEST_FILE=${MANIFEST_FILE:=$(pwd)/manifest.txt}
+test -f "${MANIFEST_FILE}" || exit 4
+
+
 
 # If you have a header then change the additional line
 HEADER_LINES=0
@@ -33,7 +36,6 @@ HEADER_LINES=0
 # Items per array to process.  e.g. each array slot will work on this number of items
 PROCESS_COUNT=23
 
-test -f "${MANIFEST_FILE}" || exit 4
 PROCESS_SLOTS=$(( SLURM_ARRAY_TASK_COUNT * PROCESS_COUNT ))
 
 # Read the manifest into an array for faster processing
@@ -61,9 +63,14 @@ do
         echo "Processing task ID: ${SLURM_ARRAY_TASK_ID}, line ${ITEM_TO_PROCESS} in ${MANIFEST_FILE}"
         echo "Input line ${ITEM_TO_PROCESS}: ${MANIFEST_LIST[${ITEM_TO_PROCESS}]}"
 
+        ## Add your work here - this will loop over the items assigned to that step 
+        ## and process the line from the manifest file 
         # Do the actual work!!!!
+
         # shasum -a 512 "${MANIFEST_LIST[${ITEM_TO_PROCESS}]}" >> "${MANIFEST_FILE}".sha512
         echo "${MANIFEST_LIST[${ITEM_TO_PROCESS}]}" | xargs printf '%x\n'
+
+        ## End work stream
     else
         sleep $(( RANDOM%20 ))
         echo "Step ${SLURM_ARRAY_TASK_ID}, item ${ITEM_TO_PROCESS} is past the end of the manifest" >&2
