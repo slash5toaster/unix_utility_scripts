@@ -65,10 +65,12 @@ if __name__ == "__main__":
     subuid_file = "/tmp/subuid"
 
     if len(sys.argv) < 2:
-        print("Usage: python3 generate_subids.py <username1> <username2> ...")
+        print("Usage: python3 create_subuid.py <username1> <username2> ...")
         sys.exit(1)
 
     for user in sys.argv[1:]:
         if calculate_subid_range(user):
-            append_to_control_file(subuid_file,calculate_subid_range(user))
-            append_to_control_file(subgid_file,calculate_subid_range(user))
+            append_to_control_file(subuid_file,
+                                   calculate_subid_range(user))
+            append_to_control_file(subgid_file,
+                                   calculate_subid_range(user))
