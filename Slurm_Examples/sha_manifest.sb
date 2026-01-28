@@ -10,6 +10,10 @@
 # Load necessary modules
 ml parallel
 
-MANIFEST_DIR=${MANIFEST_DIR:=$(pwd)}
+if [[ -z ${MANIFEST_DIR} ]] ; then
+   MANIFEST_DIR=${1:-$(pwd)}
+fi
+
+test -d ${MANIFEST_DIR} || ( echo "${MANIFEST_DIR} is not a directory" >&2 ; exit 3)
 
 sha_manifest.sh ${MANIFEST_DIR}
