@@ -35,7 +35,9 @@ def calculate_subid_range(subuid_file,
         # get the number of lines from /etc/subuid
         if os.path.exists(subuid_file):
             with open(subuid_file,'r',encoding="utf-8") as file:
-                subuid_lines = len(file.readlines()) + 1 
+                subuid_lines = len(file.readlines()) + 1
+        else:
+            subuid_lines = 0
 
         start_range = base_offset + (subuid_lines * range_size)
         subuid_string = str(uid) + ":" + str(start_range) + ":" +  str(range_size)
