@@ -23,7 +23,7 @@ service_list=(
 for svc in "${service_list[@]}"; 
 do 
     if [[ $(systemctl --user is-active "${svc}") ]]; then
-        noop
+        : # noop
     else 
         systemctl --user start "${svc}"
         systemctl --user enable "${svc}"
