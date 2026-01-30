@@ -73,7 +73,7 @@ def append_to_control_file(file_path,
         with open(file_path, 'a', encoding='utf-8') as file:
             # Add a newline to the text to ensure the next entry is on a new line
             file.write(approval_string + '\n')
-            print(f"Success: '{approval_string}' added to the {file_path}.",file=sys.stderr)
+            # print(f"Success: '{approval_string}' added to the {file_path}.",file=sys.stderr)
             return True
 
 # ====================================================
@@ -87,7 +87,7 @@ if __name__ == "__main__":
 
     for user in sys.argv[1:]:
         range_value = calculate_subid_range(subuid_file,username=user)
-        print(f"For {user}, range is {range_value}",file=sys.stderr)
+        # print(f"For {user}, range is {range_value}",file=sys.stderr)
         
         if range_value != False:
             append_to_control_file(subuid_file,

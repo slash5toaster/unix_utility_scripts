@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+#SBATCH --job-name=prefix
+#SBATCH -p interactive
+#SBATCH --cpus-per-task=6
+#SBATCH --mem-per-cpu=12G
+#SBATCH --output=/scratch/site/u/jonesc47/jobs/prefix_%A_%a.out
+#SBATCH --error=/scratch/site/u/jonesc47/jobs/prefix_%A_%a.err
+
+# srun -q interactive --cpus-per-task=6 --mem-per-cpu=12G --pty /apps/rocs/2024.04/x86_64/prefix/startprefix
+/apps/rocs/2024.04/x86_64/prefix/startprefix || exit 4
+source /apps/rocs/init.sh 2024.04 && ml EasyBuild
+
+eb --force $1
