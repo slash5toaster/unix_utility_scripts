@@ -55,18 +55,18 @@ def append_to_control_file(file_path,
     Appends new approval string to file
     """
     found = False
-    
-    # Check if file exists before trying to read it
+    real_uid =  approval_string.split(':')[0]
+    # Check if file exists before trying to read it, 
+    # if the user already exists, then skip
     if os.path.exists(file_path):
         with open(file_path, 'r', encoding='utf-8') as file:
             for line in file:
-                # .rstrip('\n') ensures we compare the content, not the formatting
-                if line.rstrip('\n') == approval_string:
+                if line.split(':')[0] == real_uid:
                     found = True
                     break
     
     if found:
-        print(f"Skipped: Exact match for '{approval_string}' already exists.",file=sys.stderr)
+        # print(f"Skipped: Exact match for '{real_uid}' already exists.",file=sys.stderr)
         return False
     else:
         # Open in append mode ('a'). This creates the file if it doesn't exist.
@@ -86,9 +86,13 @@ if __name__ == "__main__":
         sys.exit(1)
 
     for user in sys.argv[1:]:
-        if calculate_subid_range(subuid_file,
-                                 user):
+        range_value = calculate_subid_range(subuid_file,username=user)
+        print(f"For {user}, range is {range_value}",file=sys.stderr)
+        
+        if range_value != False:
             append_to_control_file(subuid_file,
-                                   calculate_subid_range(user))
+                                   str(range_value))
             append_to_control_file(subgid_file,
-                                   calculate_subid_range(user))
+                                   str(range_value))
+        else:
+            print(f"Not adding {user} to {subgid_file} and {subuid_file}",file=sys.stderr)
