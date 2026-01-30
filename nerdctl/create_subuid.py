@@ -5,22 +5,39 @@ import pwd
 import sys
 import os
 
-def calculate_subid_range(username,
+def calculate_subid_range(subuid_file,
+                          username,
                           range_size=65536, 
                           base_offset=100000):
+    """
+    calculate_subid_range: calculate the sub{u,g}id range value
+       for entry into the file
+    :param subuid_file: Path to subuid file
+    :param username: username to calculate
+    :param range_size: range size for calculation
+    :param base_offset: minimum value for subuid range start
+    """
     try:
         # Get user info
         user_info = pwd.getpwnam(username)
         uid = user_info.pw_uid
         uid_base = 1000
-        
+
         # Standard calculation logic
         # Usually, we start mapping for UIDs uid_base and above
+        # to keep in the max subuid range, use the line nubmer to calculate the range
+        # going from uid overruns the the usable range of 2^32-1 (4,294,967,295)
+
         if uid < uid_base:
             return False
             print(f"# Skip system user: {username} (UID {uid})",file=sys.stderr)
 
-        start_range = base_offset + ((uid - uid_base) * range_size)
+        # get the number of lines from /etc/subuid
+        if os.path.exists(subuid_file):
+            with open(subuid_file,'r',encoding="utf-8") as file:
+                subuid_lines = len(file.readlines()) + 1 
+
+        start_range = base_offset + (subuid_lines * range_size)
         subuid_string = str(uid) + ":" + str(start_range) + ":" +  str(range_size)
 
         return f"{subuid_string}"
@@ -69,7 +86,8 @@ if __name__ == "__main__":
         sys.exit(1)
 
     for user in sys.argv[1:]:
-        if calculate_subid_range(user):
+        if calculate_subid_range(subuid_file,
+                                 user):
             append_to_control_file(subuid_file,
                                    calculate_subid_range(user))
             append_to_control_file(subgid_file,
