@@ -21,7 +21,7 @@ def calculate_subid_range(subuid_file,
         # Get user info
         user_info = pwd.getpwnam(username)
         uid = user_info.pw_uid
-        uid_base = 1000
+        uid_base = 400
 
         # Standard calculation logic
         # Usually, we start mapping for UIDs uid_base and above
@@ -75,7 +75,7 @@ def append_to_control_file(file_path,
         with open(file_path, 'a', encoding='utf-8') as file:
             # Add a newline to the text to ensure the next entry is on a new line
             file.write(approval_string + '\n')
-            # print(f"Success: '{approval_string}' added to the {file_path}.",file=sys.stderr)
+            print(f"Success: '{approval_string}' added to the {file_path}.",file=sys.stderr)
             return True
 
 # ====================================================
