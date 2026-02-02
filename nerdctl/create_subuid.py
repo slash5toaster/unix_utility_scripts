@@ -80,8 +80,8 @@ def append_to_control_file(file_path,
 
 # ====================================================
 if __name__ == "__main__":
-    subgid_file = "/tmp/subgid"
-    subuid_file = "/tmp/subuid"
+    subgid_file = "/etc/subgid"
+    subuid_file = "/etc/subuid"
 
     if len(sys.argv) < 2:
         print("Usage: python3 create_subuid.py <username1> <username2> ...")
