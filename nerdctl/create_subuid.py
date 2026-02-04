@@ -80,21 +80,18 @@ def append_to_control_file(file_path,
 
 # ====================================================
 if __name__ == "__main__":
-    subgid_file = "/etc/subgid"
-    subuid_file = "/etc/subuid"
+    UID_FILES = ["/tmp/subuid",
+                 "/tmp/subgid"]
 
     if len(sys.argv) < 2:
         print("Usage: python3 create_subuid.py <username1> <username2> ...")
         sys.exit(1)
 
     for user in sys.argv[1:]:
-        range_value = calculate_subid_range(subuid_file,username=user)
-        # print(f"For {user}, range is {range_value}",file=sys.stderr)
-        
-        if range_value != False:
-            append_to_control_file(subuid_file,
-                                   str(range_value))
-            append_to_control_file(subgid_file,
-                                   str(range_value))
-        else:
-            print(f"Not adding {user} to {subgid_file} and {subuid_file}",file=sys.stderr)
+        for index,uid_file in enumerate(UID_FILES):
+            range_value = calculate_subid_range(uid_file,username=user)
+            if range_value:
+                    append_to_control_file(uid_file,
+                                        str(range_value))
+            else:
+                print(f"Not adding {user} to {uid_file}",file=sys.stderr)
