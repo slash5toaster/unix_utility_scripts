@@ -9,7 +9,10 @@
 # systemctl --user start buildkit
 
 # setup containerd
-if [[ ! -e  $HOME/.config/systemd/user/containerd.service ]]; then 
+XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-"/run/user/$(id -u)"}
+
+if [[ ! -e  ${HOME}/.config/systemd/user/containerd.service ]]; then
+    export XDG_RUNTIME_DIR
     containerd-rootless-setuptool.sh install
     containerd-rootless-setuptool.sh install-buildkit
 fi
