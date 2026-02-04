@@ -21,7 +21,7 @@ def calculate_subid_range(subuid_file,
         # Get user info
         user_info = pwd.getpwnam(username)
         uid = user_info.pw_uid
-        uid_base = 400
+        uid_base = 1000
 
         # Standard calculation logic
         # Usually, we start mapping for UIDs uid_base and above
