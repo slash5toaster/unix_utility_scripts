@@ -8,6 +8,11 @@
 # systemctl --user enable buildkit
 # systemctl --user start buildkit
 
+# Do *not* run for system users
+if [[ $(id -u) -lt 1000 ]] ; then
+   exit 
+fi
+
 # setup containerd
 XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-"/run/user/$(id -u)"}
 
