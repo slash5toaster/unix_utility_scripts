@@ -1,0 +1,24 @@
+# defaults for all hosts! to override these, set them at each host
+Host *
+  Compression yes
+  ServerAliveInterval 20
+  WarnWeakCrypto no
+  User <unix_id>
+
+## gRED
+Host host01
+  HostName host01.example.com
+
+Host host02
+  HostName host01.example.com
+
+Host host03
+  HostName host01.example.com
+
+# change USERID to *your* unix_id
+Host host04
+  HostName <USERID>.ws.host04.example.com
+
+# HPC host04 jumphost
+Host *.hpc.host04.example.com
+    ProxyJump hpc.host04.example.com
