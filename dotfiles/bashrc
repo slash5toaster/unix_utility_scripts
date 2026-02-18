@@ -4,13 +4,15 @@
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 # If not running interactively, don't do anything
-case $- in
-    *i*) ;;
-      *) return;;
-esac
+if [[ $PS1 ]] ; then
+   :
+else
+   return
+fi 
 #######################################################
 export EDITOR=vim
 
+shopt -s direxpand
 test -e $HOME/bin/git_infostring.sh && source $HOME/bin/git_infostring.sh 
 type -p git_infostring && PS1="\u@\h:\W \$(git_infostring)\[\033[00m\] % "
 

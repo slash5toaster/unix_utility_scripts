@@ -1,0 +1,24 @@
+# defaults for all hosts! to override these, set them at each host
+Host *
+  Compression yes
+  ServerAliveInterval 20
+  WarnWeakCrypto no
+  User <unix_id>
+
+## gRED
+Host scoop-sc1
+  HostName ec-hub.sc1.science.roche.com
+
+Host scoop-kau
+  HostName ec-hub.kau.science.roche.com
+
+Host scoop-ind
+  HostName ec-hub.ind.science.roche.com
+
+# change USERID to *your* unix_id
+Host converge
+  HostName <USERID>.ws.converge.gene.com
+
+# HPC converge jumphost
+Host *.hpc.converge.gene.com
+    ProxyJump hpc.converge.gene.com
