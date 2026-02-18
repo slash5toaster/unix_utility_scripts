@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-[[ $DEBUG ]] && set -x
+[[ ${DEBUG} ]] && set -x
 set -e
 set -u
 IFS=$'\n\t'
@@ -17,7 +17,7 @@ PARALLEL_OPTS="--xarg"
 if [[ -d /dev/shm/ ]]; then
   TMP="/dev/shm/"
 fi
-TMP=${TMP:-$TMPDIR}
+TMP=${TMP:-${TMPDIR}}
 TMP=${TMP:-"/tmp"}
 
 #check to see if we have perl installed - a requirement for parallel
@@ -30,7 +30,7 @@ TARGETDIR=${1:-"."}
 if [ -e "${TARGETDIR}" ] ; then
    pushd "${TARGETDIR}" #> /dev/null
    # get the foldername and strip the leading period
-   FOLDERNAME=$(basename $(pwd))
+   FOLDERNAME=$(basename "$(pwd)")
    FOLDERNAME=${FOLDERNAME/#./}
 
    if [[ -e ${PARALLELBIN} ]]; then
@@ -47,7 +47,7 @@ if [ -e "${TARGETDIR}" ] ; then
        | grep -iv "\.Trashes" \
        | ${PARALLELBIN} -j 60 ${PARALLEL_OPTS} ${SHASUMBIN} {} \
        | sed -e 's/\.\///' \
-       | sort -k2 -T "$TMP" > "${FOLDERNAME}".sha1
+       | sort -k2 -T "${TMP}" > "${FOLDERNAME}".sha1
   else
      for f in $( find . -depth -type l -or -type f \
                  | grep -iv sha1$ \
