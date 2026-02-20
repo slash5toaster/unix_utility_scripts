@@ -1,9 +1,7 @@
-# defaults for all hosts! to override these, set them at each host
 Host *
   Compression yes
   ServerAliveInterval 20
   WarnWeakCrypto no
-  User <unix_id>
 
 ## gRED
 Host scoop-sc1
