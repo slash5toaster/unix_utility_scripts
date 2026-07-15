@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
-#SBATCH --job-name=shasum
-#SBATCH --output=/scratch/site/u/jonesc47/jobs/shasum_%A_%a.out
-#SBATCH --error=/scratch/site/u/jonesc47/jobs/shasum_%A_%a.err
+#SBATCH --job-name=Array_with_Manifest_Parameters
+#SBATCH --output=/scratch/site/u/jonesc47/jobs/array_parameters_%A_%a.out
+#SBATCH --error=/scratch/site/u/jonesc47/jobs/array_parameters_%A_%a.err
 #SBATCH --time=00:10:00
 #SBATCH --mem=1G
+# Math depends on a zero based array, change the max to get enough slots (slots = items to process/Process_Count)
 #SBATCH --array=1-45
 
 # Load necessary modules
@@ -22,42 +23,76 @@
 # For example
 # File,FirstParam,SecondParam,ThirdParam
 #
-# you can pass the manifest file using a variable from the slurm submission
+# You can pass the manifest file using a variable from the slurm submission
 # sbatch --export=MANIFEST_FILE="/full/path/to/file/manifest.txt"  slurm_array_job_using_config.sb
-MANIFEST_FILE=${MANIFEST_FILE:=~/scratch/manifest.txt}
-
-# If you have a header then change the additional line
-HEADER_LINES=0
-
+MANIFEST_FILE=${MANIFEST_FILE:=$(pwd)/manifest.txt}
 test -f "${MANIFEST_FILE}" || exit 4
 
+# If you have a header line in the manifest file, then change the value here
+# e.g. Header_Lines=1 for the following input
+# Input_file
+# file001
+# ...
+# file9999
+Header_Lines=0
+
+Process_Count=23
+# Items per array to process.  e.g. each array slot will work on this number of items
+
+Process_Slots=$(( SLURM_ARRAY_TASK_COUNT * Process_Count ))
+
 # Read the manifest into an array for faster processing
-declare -a MANIFEST_LIST
-mapfile -t MANIFEST_LIST < "${MANIFEST_FILE}"
+declare -a Manifest_List
+mapfile -t Manifest_List < "${MANIFEST_FILE}"
 
-# Process the contents of the manifiest - this is the array value matching the line in the manifest
-# If you have a header then change the additional line
-STEPID=$(( SLURM_ARRAY_TASK_ID + HEADER_LINES ))
+Data_Count=$(( ${#Manifest_List[@]} - Header_Lines ))
 
-# Don't try to process past the end of the manifest
-if [[ ${STEPID} -le ${#MANIFEST_LIST[@]} ]];then
-
-    # this parses the manifest line into parameters 
-    # uses the separator (IFS) to parse the line. 
-    # N.B. your parameters MUST NOT include the separator
-    # Change the IFS to match whatever you use "|, _, whatever"
-    IFS=',' read -r -a TEMPARRAY <<< "${MANIFEST_LIST[${STEPID}]}"
-    TargetFile=${TEMPARRAY[0]}
-    FirstParam=${TEMPARRAY[1]}
-    SecondParam=${TEMPARRAY[2]}
-    ThirdParam=${TEMPARRAY[3]}
-
-    # Add Code to work here
-    echo "Processing task ID: ${SLURM_ARRAY_TASK_ID}, line ${STEPID} in ${MANIFEST_FILE}"
-    echo "Input file: ${MANIFEST_LIST[${STEPID}]}"
-    echo "Using ${FirstParam}, ${SecondParam}, ${ThirdParam} on ${TargetFile}"
-    
-else
-    echo "no input for step ${STEPID}"
+# Check the counts!
+if [[ ${Process_Slots} -lt ${Data_Count} ]]; then
+   echo "${MANIFEST_FILE} is longer, ${Data_Count} lines, than the slurm array size (${Process_Slots} slots) ensure you are processing all the items!!" >&2
+   ## Failsafe, comment this out if you want to process a partial set
+   scancel "${SLURM_ARRAY_JOB_ID}"
+   exit 2
 fi
 
+# Process the contents of the manifiest - this is the array value matching the line in the manifest
+# where to Start_Index in the manifest
+Array_Offset=$(( SLURM_ARRAY_TASK_ID ))
+Start_Index=$(( Array_Offset * Process_Count ))
+Start_Index=$(( Start_Index + Header_Lines ))
+End_Index=$(( Start_Index + Process_Count - 1 ))
+
+# loop thru the number of items assigned to this slot
+for Item_To_Process in $( seq ${Start_Index} ${End_Index} );
+do
+    echo "Where we are - ${SLURM_ARRAY_TASK_ID} - ${Item_To_Process} - ${Start_Index} - ${End_Index} ${#Manifest_List[@]}"
+    # Don't try to process past the end of the manifest
+    if [[ ${Item_To_Process} -le ${Data_Count} ]];then
+        echo "Processing task ID: ${SLURM_ARRAY_TASK_ID}, line ${Item_To_Process} in ${MANIFEST_FILE}"
+        echo "Input line ${Item_To_Process}: ${Manifest_List[${Item_To_Process}]}"
+
+        # this parses the manifest line into parameters
+        # uses the separator (IFS) to parse the line.
+        # N.B. your parameters MUST NOT include the separator
+        # Change the IFS to match whatever you use "|, _, whatever"
+        IFS=',' read -r -a Temp_Array <<< "${Manifest_List[${Item_To_Process}]}"
+        Target_File=${Temp_Array[0]}
+        First_Param=${Temp_Array[1]}
+        Second_Param=${Temp_Array[2]}
+        Third_Param=${Temp_Array[3]}
+    
+        ## Add your work here - this will loop over the items assigned to that step
+        ## and process the line from the manifest file
+
+        echo "Processing task ID: ${SLURM_ARRAY_TASK_ID}, line ${Item_To_Process} in ${MANIFEST_FILE}"
+        echo "Input file: ${Manifest_List[${Item_To_Process}]}"
+        echo "Using ${First_Param}, ${Second_Param}, ${Third_Param} on ${Target_File}"
+    
+        ## End work stream
+
+    else
+        echo "Step ${SLURM_ARRAY_TASK_ID}, item ${Item_To_Process} is past the end of the manifest" >&2
+        sleep $(( RANDOM%20 ))
+    fi
+    sleep $(( RANDOM%20 ))
+done
