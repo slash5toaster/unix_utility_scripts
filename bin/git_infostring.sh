@@ -14,6 +14,8 @@ git_infostring()
   local DIRTY_FLAG=""
   local DIRTY_OR_STAGED="STAGED"
   local GIT_BRANCH=""
+  local GIT_BRANCH_MAX_LENGTH=15
+  local GIT_BRANCH_TAIL_LENGTH=2
   local GIT_INFO=""
   local STAGED_COUNT=0
   local TAG_NAME=""
@@ -50,8 +52,12 @@ git_infostring()
   GIT_BRANCH=$(echo "${PORCELAIN_STATUS[$branch_head]}" | cut -d ' ' -f 3 | tr -d '()')
 
   # if we have a long branch name, truncate it
-  if [[ ${#GIT_BRANCH} -gt 20 ]]; then
-    GIT_BRANCH="${GIT_BRANCH:0:14}...${GIT_BRANCH: -4}"
+  if [[ ${#GIT_BRANCH} -gt $GIT_BRANCH_MAX_LENGTH ]]; then
+    # calculate the max head length by subtracting the length of the ellipsis
+    #   and the last characters of the branch name
+    local GIT_BRANCH_MAX_HEAD=$((GIT_BRANCH_MAX_LENGTH - (3 + GIT_BRANCH_TAIL_LENGTH  )))
+
+    GIT_BRANCH="${GIT_BRANCH:0:$GIT_BRANCH_MAX_HEAD}...${GIT_BRANCH: -${GIT_BRANCH_TAIL_LENGTH}}"
     [[ $DEBUG_BGI ]] && echo "truncated branch to ${GIT_BRANCH}"
   fi
 
