@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+type -t ml >/dev/null && ml parallel
 type -p parallel > /dev/null || (echo "Can't run - need to have parallel https://www.gnu.org/software/parallel/"  && exit)
 
 THISFOLDER=$(basename "$(pwd)"|sed -e 's/^\.//')

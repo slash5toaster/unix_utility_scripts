@@ -2,7 +2,7 @@
 
 # create xkcd style passwords aka https://xkcd.com/936/
 
-[[ $DEBUG ]] && set -x
+[[ ${DEBUG} ]] && set -x
 
 #variables
 declare -a SPCHARLIST
@@ -14,17 +14,18 @@ SPCHARLIST=("@" "#" "$" "%" "^" "&" "+" "_")
 
 # Functions
 usageHelp="Usage: ${0##*/}"
-defaultHelp=" -h help "
-digitsHelp="  -n Number of digits (e.g. -n 3 gives 000-999) defaults to 3, max 10"
-spcharHelp="  -s Adds special characters '(${SPCHARLIST[@]})'"
+defaultHelp="  -h help "
+ digitsHelp="  -n Number of digits (e.g. -n 3 gives 000-999) defaults to 3, max 10"
+ spcharHelp="  -s Adds special characters '(${SPCHARLIST[*]})'"
 badOptionHelp="Option not recognised"
 #---------------------------------------------------------------
 printHelpAndExit()
 {
   echo "${usageHelp}"
+  echo "${defaultHelp}"
   echo "${digitsHelp}"
   echo "${spcharHelp}"
-  exit $1
+  exit "$1"
 }
 
 #---------------------------------------------------------------
@@ -45,65 +46,65 @@ sanitycheck()
    else
      ALLGOOD=4
    fi
-   return $ALLGOOD
+   return "${ALLGOOD}"
 }
 
 getrandomword()
 {
   # pick a random word from the dictionary, 32K*32K = 1 billion
-  DICT_COUNT=$(wc -l $DICTIONARY \
+  DICT_COUNT=$(wc -l ${DICTIONARY} \
                | tr -s ' ' \
                | sed -e 's/^\ //' \
                | cut -d' '  -f1 )
-  (( STARTFROMBOTTOM = $RANDOM*$RANDOM%$DICT_COUNT ))
-  RWORD="$(tail -n $STARTFROMBOTTOM $DICTIONARY \
+  (( STARTFROMBOTTOM = RANDOM*RANDOM%DICT_COUNT ))
+  RWORD="$(tail -n ${STARTFROMBOTTOM} ${DICTIONARY} \
            | head -n 1 \
            | sed -e "s/[[:punct:]]//g" \
-           | tr '[[:upper:]]' '[[:lower:]]')"
+           | tr '[:upper:]' '[:lower:]')"
 }
 
 getrandomnumber()
 {
   #get a random number with digits set by NUMPWR
   NUMPWR=${1:-3}
-  (( MAXNUM= 10**$NUMPWR ))
-  (( MINNUM = $MAXNUM/10 ))
-  while [ $RNUM -lt $MINNUM ] ;
+  (( MAXNUM= 10**NUMPWR ))
+  (( MINNUM = MAXNUM/10 ))
+  while [ ${RNUM} -lt ${MINNUM} ] ;
   do
-    (( RNUM = $RANDOM*$RANDOM%$MAXNUM ))
+    (( RNUM = RANDOM*RANDOM%MAXNUM ))
   done
-  return $RNUM
+  return ${RNUM}
 }
 
 #######################################
 while getopts "hn:s" optionName; do
-   case "$optionName" in
+   case "${optionName}" in
       h)  printHelpAndExit 0;;
-      n)  NUMPWR="$OPTARG";;
+      n)  NUMPWR="${OPTARG}";;
       s)  SPCHAR=1;;
       [?])  printErrorHelpAndExit "${badOptionHelp}";;
    esac
 done
 
 # validate $NUMPWR is a digit
-case $NUMPWR in
-    ''|*[!0-9]*) echo "-n must be a digit (less than 10)" ; unset NUMPWR ;;
+case ${NUMPWR} in
+    *[!0-9]*) echo "-n must be a digit (less than 10)" ; unset NUMPWR ;;
 esac
 
 if [[ ${NUMPWR} -gt 10 ]]; then
   NUMPWR=10
 fi
 
-getrandomnumber ${NUMPWR}
+getrandomnumber "${NUMPWR}"
 getrandomword
 
-RWORD1=$RWORD
-RWORD1=$(echo ${RWORD} | tr '[:upper:]' '[:lower:]')
+RWORD1=${RWORD}
+RWORD1=$(echo "${RWORD}" | tr '[:upper:]' '[:lower:]')
 
 # pick a random word from the dictionary and captialize it
 getrandomword
-RWORD2=$RWORD
-RWORD2=$(echo ${RWORD2:0:1} | tr '[:lower:]' '[:upper:]')${RWORD2:1}
+RWORD2=${RWORD}
+RWORD2=$(echo "${RWORD2:0:1}" | tr '[:lower:]' '[:upper:]')${RWORD2:1}
 
 if [[ ${SPCHAR} ]]; then
   echo ${RWORD1}${RNUM}${RWORD2}${SPCHARLIST[ (( $RANDOM%${#SPCHARLIST[@]} )) ]}
