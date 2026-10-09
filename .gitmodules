@@ -1,0 +1,4 @@
+[submodule "xkcdpass"]
+	path = bin/xkcdpass
+	url = https://github.com/slash5toaster/xkcdpass.git
+	branch = main
